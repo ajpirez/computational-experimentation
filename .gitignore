@@ -5,5 +5,3 @@ results/_smoke_*.csv
 results/_python_run.log
 __pycache__/
 .DS_Store
-
-presentations/
