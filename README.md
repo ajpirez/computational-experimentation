@@ -17,18 +17,12 @@ El nivel de significación del contraste es α = 0.05.
 
 ## Variables
 
-
-
 ### Independientes
-
 
 | Variable                | Niveles               |
 | ----------------------- | --------------------- |
 | Lenguaje                | C++, Go, Java, Python |
 | Tamaño de la matriz (N) | 500, 1000, 1500       |
-
-
-
 
 ### Dependiente
 
@@ -42,8 +36,6 @@ Tiempo de ejecución de la multiplicación, en segundos. Cada medición queda id
 - Misma forma de medir el tiempo.
 - Sin librerías de multiplicación de matrices.
 - Misma máquina para las cuatro implementaciones.
-
-
 
 ## Diseño experimental
 
@@ -77,3 +69,43 @@ Primero se llena A por filas y después B, siguiendo con el mismo generador. As�
 ### Medición
 
 El tiempo empieza justo antes de la multiplicación y termina cuando C ya está calculada. Generar o inicializar las matrices no forma parte del tiempo registrado.
+
+## Implementación
+
+Las cuatro implementaciones están en `cpp/`, `go/`, `java/` y `python/`. Usan el mismo algoritmo, el mismo tipo de 64 bits, la misma semilla y el mismo criterio de reloj. No usan librerías de multiplicación de matrices.
+
+Los resultados de cada lenguaje quedan en:
+
+- `results/cpp.csv`
+- `results/go.csv`
+- `results/java.csv`
+- `results/python.csv`
+
+Cada archivo tiene las columnas `language`, `N`, `repetition` y `time_seconds`.
+
+Las características de la máquina y las versiones de los compiladores están en `ENVIRONMENT.md`.
+
+## Cómo ejecutar
+
+Desde la raíz del repositorio:
+
+```text
+g++ -O2 -o cpp/main.exe cpp/main.cpp
+cpp/main.exe --out results/cpp.csv
+
+cd go
+go build -o main.exe .
+cd ..
+go/main.exe -out results/go.csv
+
+javac -d java java/Main.java
+java -cp java Main --out results/java.csv
+
+python python/main.py --out results/python.csv
+```
+
+Cada corrida completa usa N = 500, 1000 y 1500, con 10 repeticiones por tamaño. Para una prueba corta:
+
+```text
+python python/main.py --n 50 --reps 1 --out results/python.csv
+```
