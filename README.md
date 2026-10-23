@@ -85,7 +85,86 @@ Cada archivo tiene las columnas `language`, `N`, `repetition` y `time_seconds`.
 
 Las características de la máquina y las versiones de los compiladores están en `ENVIRONMENT.md`.
 
-## Cómo ejecutar
+## Cómo ejecutar con Docker
+
+Hace falta Docker. Cada imagen se construye a mano con su `Dockerfile`. Dentro van el compilador o el intérprete y el programa de ese lenguaje. La corrida escribe un CSV en la carpeta `results/` del equipo.
+
+### Construcción
+
+Desde la raíz del repositorio:
+
+```text
+docker build -t matrix-bench-cpp:1.0 cpp
+docker build -t matrix-bench-go:1.0 go
+docker build -t matrix-bench-java:1.0 java
+docker build -t matrix-bench-python:1.0 python
+```
+
+### Corrida completa
+
+N = 500, 1000 y 1500, con 10 repeticiones. En PowerShell:
+
+```text
+New-Item -ItemType Directory -Force -Path results
+
+docker run --rm -v "${PWD}/results:/results" matrix-bench-cpp:1.0 --out /results/cpp.csv
+docker run --rm -v "${PWD}/results:/results" matrix-bench-go:1.0 -out /results/go.csv
+docker run --rm -v "${PWD}/results:/results" matrix-bench-java:1.0 --out /results/java.csv
+docker run --rm -v "${PWD}/results:/results" matrix-bench-python:1.0 --out /results/python.csv
+```
+
+Go usa `-out`. Los otros tres usan `--out`. El archivo que sale tiene las columnas `language`, `N`, `repetition` y `time_seconds`.
+
+La corrida de Python con N = 1500 puede tardar varias horas.
+
+### Prueba corta
+
+Sirve para comprobar que el contenedor genera el CSV, con una sola matriz pequeña:
+
+```text
+docker run --rm -v "${PWD}/results:/results" matrix-bench-cpp:1.0 --n 50 --reps 1 --out /results/cpp.csv
+docker run --rm -v "${PWD}/results:/results" matrix-bench-go:1.0 -n 50 -reps 1 -out /results/go.csv
+docker run --rm -v "${PWD}/results:/results" matrix-bench-java:1.0 --n 50 --reps 1 --out /results/java.csv
+docker run --rm -v "${PWD}/results:/results" matrix-bench-python:1.0 --n 50 --reps 1 --out /results/python.csv
+```
+
+### Publicar en Docker Hub
+
+Las cuatro imágenes están en la cuenta `94031728605`, etiqueta `1.0`:
+
+- https://hub.docker.com/r/94031728605/matrix-bench-cpp
+- https://hub.docker.com/r/94031728605/matrix-bench-go
+- https://hub.docker.com/r/94031728605/matrix-bench-java
+- https://hub.docker.com/r/94031728605/matrix-bench-python
+
+Para volver a publicarlas, sustituye `usuario` por el nombre de la cuenta:
+
+```text
+docker login -u usuario
+
+docker tag matrix-bench-cpp:1.0 usuario/matrix-bench-cpp:1.0
+docker tag matrix-bench-go:1.0 usuario/matrix-bench-go:1.0
+docker tag matrix-bench-java:1.0 usuario/matrix-bench-java:1.0
+docker tag matrix-bench-python:1.0 usuario/matrix-bench-python:1.0
+
+docker push usuario/matrix-bench-cpp:1.0
+docker push usuario/matrix-bench-go:1.0
+docker push usuario/matrix-bench-java:1.0
+docker push usuario/matrix-bench-python:1.0
+```
+
+En la página de cada repositorio, el campo de descripción corta puede quedar así:
+
+| Repositorio | Descripción |
+| --- | --- |
+| `matrix-bench-cpp` | Multiplicación naive de matrices NxN en C++. Mide solo el producto. |
+| `matrix-bench-go` | Multiplicación naive de matrices NxN en Go. Mide solo el producto. |
+| `matrix-bench-java` | Multiplicación naive de matrices NxN en Java. Mide solo el producto. |
+| `matrix-bench-python` | Multiplicación naive de matrices NxN en Python. Mide solo el producto. |
+
+La descripción larga de cada imagen ya viaja en las etiquetas de la imagen (`org.opencontainers.image.title` y `org.opencontainers.image.description`). Se leen con `docker inspect matrix-bench-cpp:1.0`.
+
+## Cómo ejecutar en la máquina local
 
 Desde la raíz del repositorio:
 
